@@ -17,7 +17,7 @@ fn main() {
         println!("OK");
         match event {
             ServiceEvent::ServiceResolved(info) => {
-                println!("Resolved a new service: {}", info.get_fullname());
+                println!("Resolved a new service: {} {} {}", info.get_fullname(), info.get_hostname(), info.get_port());
             }
             other_event => {
                 println!("Received other event: {:?}", &other_event);
