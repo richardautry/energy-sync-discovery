@@ -39,7 +39,7 @@ fn register_service() {
     let mdns = ServiceDaemon::new().expect("Failed to create daemon");
 
     // Create a service info.
-    let service_type = "_http._udp.local.";
+    let service_type = "_energy-sync._tcp.local.";
     let instance_name = "my-instance";
     // let host_ipv4 = "192.168.1.12";
     let host_ipv4 = "0.0.0.0";
@@ -47,7 +47,7 @@ fn register_service() {
     let host_name = "my-instance.local.";
     // TODO: This basically works, but how to discover service on wifi?
     // It doesn't seem like this is broadcasting on wifi but instead looking at localhost (this computer only)
-    let port = 3000;
+    let port = 5200;
     let properties = [("property_1", "test"), ("property_2", "1234")];
 
     let my_service = ServiceInfo::new(
@@ -60,7 +60,7 @@ fn register_service() {
     ).unwrap();
 
     // Register with the daemon, which publishes the service.
-    mdns.register(my_service).expect("Failed to register our service");
+    mdns.register(my_service).unwrap();
     println!("Finished registering");
 }
 
