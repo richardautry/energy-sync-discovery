@@ -4,19 +4,21 @@ use mdns::{Error, Record, RecordKind};
 use std::{net::IpAddr, time::Duration};
 
 fn main() {
+    // register_service();
+
     // Create a daemon
-    // let mdns = ServiceDaemon::new().expect("Failed to create daemon");
+    let mdns = ServiceDaemon::new().expect("Failed to create daemon");
 
-    // // Browse for a service type.
-    // // TODO: How to get this to browse wifi network and not local network?
-    // let service_type = "_http._udp.local.";
-    // let receiver = mdns.browse(service_type).expect("Couldn't browse");
+    // Browse for a service type.
+    // TODO: How to get this to browse wifi network and not local network?
+    let service_type = "_rust._tcp.local.";
+    let receiver = mdns.browse(service_type).expect("Couldn't browse");
 
-    // // Receive the browse events in sync or async. Here is
-    // // an example of using a thread. Users can call `receiver.recv_async().await`
-    // // if running in async environment.
-    // // std::thread::spawn(move || {
-    // println!("Starting loop");
+    // Receive the browse events in sync or async. Here is
+    // an example of using a thread. Users can call `receiver.recv_async().await`
+    // if running in async environment.
+    // std::thread::spawn(move || {
+    println!("Starting loop");
     // while let Ok(event) = receiver.recv() {
     //     println!("OK");
     //     match event {
@@ -30,7 +32,21 @@ fn main() {
     //         }
     //     }
     // };
-    register_service();
+    std::thread::spawn(move || {
+        while let Ok(event) = receiver.recv() {
+            match event {
+                ServiceEvent::ServiceResolved(info) => {
+                    println!("Resolved a new service: {}", info.get_fullname());
+                }
+                other_event => {
+                    println!("Received other event: {:?}", &other_event);
+                }
+            }
+        }
+    });
+
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    mdns.shutdown().unwrap();
 }
 
 fn register_service() {
@@ -44,7 +60,7 @@ fn register_service() {
     // let host_ipv4 = "192.168.1.12";
     let host_ipv4 = "0.0.0.0";
     // let host_name = "192.168.1.12.local.";
-    let host_name = "my-instance.local.";
+    let host_name = "0.0.0.0.local.";
     // TODO: This basically works, but how to discover service on wifi?
     // It doesn't seem like this is broadcasting on wifi but instead looking at localhost (this computer only)
     let port = 5200;
