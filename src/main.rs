@@ -2,15 +2,38 @@ use mdns_sd::{ServiceDaemon, ServiceEvent, ServiceInfo};
 use futures_util::{pin_mut, stream::StreamExt};
 use mdns::{Error, Record, RecordKind};
 use std::{net::IpAddr, time::Duration};
+use reqwest;
 
 fn main() {
     // register_service();
 
+    scan_for_service();
+}
+
+fn scan_for_service() {
+    // current target server ip 192.168.1.197
+    // for 0 - 255
+    // ping 192.168.1.(i):3000
+    // if msg is "welcome to energy sync"
+    // return ip address
+
+    let ip_address_start: &str = "http://192.168.1.";
+    let port_num: &str = ":3000";
+
+    for i in 197..255 {
+        let ip_address = format!("{ip_address_start}{i}{port_num}");
+        println!("{}", ip_address);
+        let body = reqwest::blocking::get(&ip_address).unwrap().text().unwrap();
+        println!("{}", body);
+    }
+    
+}
+
+fn discover_services() {
     // Create a daemon
     let mdns = ServiceDaemon::new().expect("Failed to create daemon");
 
     // Browse for a service type.
-    // TODO: How to get this to browse wifi network and not local network?
     let service_type = "_rust._tcp.local.";
     let receiver = mdns.browse(service_type).expect("Couldn't browse");
 
