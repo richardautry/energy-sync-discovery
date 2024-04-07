@@ -10,7 +10,7 @@ fn main() {
     scan_for_service();
 }
 
-fn scan_for_service() {
+fn scan_for_service() -> String {
     // current target server ip 192.168.1.197
     // for 0 - 255
     // ping 192.168.1.(i):3000
@@ -19,14 +19,27 @@ fn scan_for_service() {
 
     let ip_address_start: &str = "http://192.168.1.";
     let port_num: &str = ":3000";
+    let mut server_ip = String::new();
 
     for i in 197..255 {
         let ip_address = format!("{ip_address_start}{i}{port_num}");
         println!("{}", ip_address);
-        let body = reqwest::blocking::get(&ip_address).unwrap().text().unwrap();
-        println!("{}", body);
+        // TODO: Timeout on reqwest get. I may have to use ClientBuilder to ge this functionality
+        match reqwest::blocking::get(&ip_address) {
+            Ok(body) => {
+                println!("{}", ip_address);
+                let response_text = body.text().unwrap();
+                println!("{}", response_text);
+                if response_text == "Welcome to EnergySync" {
+                    server_ip = ip_address;
+                    break;
+                }
+            }
+            Err(_) => {}
+        }
     }
     
+    server_ip
 }
 
 fn discover_services() {
